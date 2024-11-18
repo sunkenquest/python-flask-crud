@@ -1,8 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import cryptography
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
-import jwt
 from models import User
 from config import db
 from utils.utils import encrypt_password, decrypt_password
@@ -34,7 +33,8 @@ def login():
         return jsonify({"msg": "Invalid credentials"}), 401
 
     access_token = create_access_token(
-        identity={"user_id": user.id, "username": user.user_name}
+        identity={"user_id": user.id, "username": user.user_name},
+        expires_delta=timedelta(days=1),
     )
 
     return jsonify({"access_token": access_token}), 200
