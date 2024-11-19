@@ -2,7 +2,8 @@ from datetime import timedelta
 import cryptography
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
-from models import User
+
+from models.UserModel import User
 from config import db
 from utils.utils import encrypt_password, decrypt_password
 
