@@ -1,12 +1,6 @@
-from datetime import timedelta
-import cryptography
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token
 
 from services.UserService import UserService
-from models.UserModel import User
-from config import db
-from utils.utils import encrypt_password, decrypt_password
 
 user_bp = Blueprint("user", __name__)
 user_service = UserService()
