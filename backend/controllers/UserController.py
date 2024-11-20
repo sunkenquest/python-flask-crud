@@ -1,6 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, url_for
+from flask_mail import Message
 
 from services.UserService import UserService
+from config import db, mail, serializer
 
 user_bp = Blueprint("user", __name__)
 user_service = UserService()
@@ -21,6 +23,11 @@ def login():
 
     if not user:
         return jsonify({"msg": "User not found"}), 404
+
+    message, status_code = user_service.check_email_confirmed(user.email)
+
+    if status_code != 200:
+        return jsonify(message), status_code
 
     access_token, error, status_code = user_service.authenticate_user(
         username, password
@@ -51,13 +58,12 @@ def register():
         return jsonify({"msg": "User already exists"}), 409
 
     message, status_code = user_service.register_user(username, password, email)
+    if status_code != 201:
+        return jsonify(message), status_code
 
-    email_response, email_status = user_service.send_email_notfication(email, username)
-
-    if email_status != 201:
-        return jsonify(email_response), status_code
-
-    return jsonify(message), status_code
+    error, status_code = user_service.generate_confirmation_token(email)
+    if error:
+        return jsonify(error), status_code
 
 
 @user_bp.route("/delete/<id>", methods=["DELETE"])
@@ -74,3 +80,20 @@ def delete(id):
     message, status_code = user_service.delete_user(id)
 
     return jsonify(message), status_code
+
+
+@user_bp.route("/confirm/<token>")
+def confirm_email(token):
+    """
+    Confirm email verification
+    """
+    try:
+        email = serializer.loads(token, salt="email-confirmation-salt", max_age=3600)
+    except:
+        return "The confirmation link is invalid or has expired."
+
+    message, status_code = user_service.email_confirmed(email)
+    if status_code != 200:
+        return jsonify(message), status_code
+
+    return f"Email {email} has been confirmed!"
