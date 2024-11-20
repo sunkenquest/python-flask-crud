@@ -16,6 +16,14 @@ class UserService:
 
         return None
 
+    def create_access_token(self, user):
+        access_token = create_access_token(
+            identity={"user_id": user.id, "username": user.username},
+            expires_delta=timedelta(days=1),
+        )
+
+        return access_token
+
     def authenticate_user(self, username, password):
         """Authenticate the user by decrypting the password and checking credentials"""
         user = self.check_user_exist("username", username)
@@ -31,10 +39,7 @@ class UserService:
         if decrypted_password != password:
             return None, {"msg": "Invalid credentials"}, 401
 
-        access_token = create_access_token(
-            identity={"user_id": user.id, "username": user.username},
-            expires_delta=timedelta(days=1),
-        )
+        access_token = self.create_access_token(self, user)
 
         return access_token, None, 200
 
