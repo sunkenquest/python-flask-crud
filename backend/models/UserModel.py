@@ -7,6 +7,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=False, nullable=False)
     password = db.Column(db.String(120), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=False, nullable=False)
+    email_confirmed = db.Column(db.Boolean, default=False, nullable=False)
 
     @property
     def to_json(self):
@@ -15,4 +16,5 @@ class User(db.Model):
             "username": self.username,
             "password": self.password,
             "email": self.email,
+            "email_confirmed": self.email_confirmed,
         }

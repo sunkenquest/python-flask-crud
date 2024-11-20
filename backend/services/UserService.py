@@ -1,11 +1,11 @@
 from datetime import timedelta
 import cryptography
-from flask import app, jsonify
+from flask import app, jsonify, url_for
 from flask_jwt_extended import create_access_token
 from flask_mail import Message
 from utils.utils import decrypt_password, encrypt_password
 from models.UserModel import User
-from config import db, mail
+from config import db, mail, serializer
 
 
 class UserService:
@@ -41,7 +41,7 @@ class UserService:
         if decrypted_password != password:
             return None, {"msg": "Invalid credentials"}, 401
 
-        access_token = self.create_access_token(self, user)
+        access_token = self.create_access_token(user)
 
         return access_token, None, 200
 
@@ -99,3 +99,46 @@ class UserService:
         except Exception as e:
             db.session.rollback()
             return {"msg": "Error deleting user", "error": str(e)}, 500
+
+    def generate_confirmation_token(self, email):
+        token = serializer.dumps(email, salt="email-confirmation-salt")
+
+        confirm_url = url_for("user.confirm_email", token=token, _external=True)
+
+        msg = Message("Confirm Your Email", recipients=[email])
+        msg.body = (
+            f"Please confirm your email by clicking the following link: {confirm_url}"
+        )
+
+        try:
+            mail.send(msg)
+            return "A confirmation email has been sent.", 200
+        except Exception as e:
+            return f"Error: {str(e)}", 500
+
+    def email_confirmed(self, email):
+        user = self.check_user_exist("email", email)
+
+        if not user:
+            return {"error": "User not found"}, 404
+
+        try:
+            if user:
+                user.email_confirmed = True
+                db.session.commit()
+                return {"message": f"Email confirmed for user: {user.username}"}, 200
+            else:
+                return {"error": "User not found"}, 404
+        except Exception as e:
+            return f"Error: {str(e)}", 500
+
+    def check_email_confirmed(self, email):
+        user = self.check_user_exist("email", email)
+
+        if not user:
+            return {"error": "User not found"}, 404
+
+        if user.email_confirmed:
+            return {"message": "Email is confirmed"}, 200
+        else:
+            return {"error": "Email is not confirmed"}, 400
