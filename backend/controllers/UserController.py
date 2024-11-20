@@ -48,8 +48,8 @@ def register():
     password = request.json.get("password")
     email = request.json.get("email")
 
-    if not username or not password:
-        return jsonify({"msg": "Username and password are required"}), 400
+    if not username or not password or not email:
+        return jsonify({"msg": "Username, password and email are required"}), 400
 
     existing_user = user_service.check_user_exist("username", username)
     existing_email = user_service.check_user_exist("email", email)
@@ -97,3 +97,23 @@ def confirm_email(token):
         return jsonify(message), status_code
 
     return f"Email {email} has been confirmed!"
+
+
+@user_bp.route("/resend-email", methods=["POST"])
+def resend_email():
+    """
+    Resend email confirmation
+    """
+
+    email = request.json.get("email")
+    if not email:
+        return jsonify({"msg": "Username, password and email are required"}), 400
+
+    existing_user = user_service.check_user_exist("email", email)
+
+    if not existing_user:
+        return jsonify({"msg": "User with that email is not found"}), 404
+
+    error, status_code = user_service.generate_confirmation_token(email)
+    if error:
+        return jsonify(error), status_code
