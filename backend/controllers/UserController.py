@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, app, request, jsonify
 
 from services.UserService import UserService
 
@@ -51,5 +51,10 @@ def register():
         return jsonify({"msg": "User already exists"}), 409
 
     message, status_code = user_service.register_user(username, password, email)
+
+    email_response, email_status = user_service.send_email_notfication(email, username)
+
+    if email_status != 201:
+        return jsonify(email_response), status_code
 
     return jsonify(message), status_code

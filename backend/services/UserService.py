@@ -1,9 +1,11 @@
 from datetime import timedelta
 import cryptography
+from flask import app, jsonify
 from flask_jwt_extended import create_access_token
+from flask_mail import Message
 from utils.utils import decrypt_password, encrypt_password
 from models.UserModel import User
-from config import db
+from config import db, mail
 
 
 class UserService:
@@ -57,3 +59,24 @@ class UserService:
         except Exception as e:
             db.session.rollback()
             return {"msg": "Error saving user", "error": str(e)}, 500
+
+    def send_email_notfication(self, email, username):
+        """Notify user once registered"""
+
+        subject = "Welcome to Our Platform!"
+        body = f"""
+        Hi {username},
+
+        Welcome to our platform! We're excited to have you on board.
+
+        Best regards,
+        The Team
+        """
+
+        try:
+            msg = Message(subject, recipients=[email], body=body)
+            mail.send(msg)
+            return jsonify({"message": "Welcome email sent successfully!"}), 201
+        except Exception as e:
+            app.logger.error(f"Failed to send email to {email}: {str(e)}")
+            return jsonify({"error": str(e)}), 500
