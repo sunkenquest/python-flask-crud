@@ -1,4 +1,4 @@
-from flask import Blueprint, app, request, jsonify
+from flask import Blueprint, request, jsonify
 
 from services.UserService import UserService
 
@@ -56,5 +56,21 @@ def register():
 
     if email_status != 201:
         return jsonify(email_response), status_code
+
+    return jsonify(message), status_code
+
+
+@user_bp.route("/delete/<id>", methods=["DELETE"])
+def delete(id):
+    """
+    Delete user
+    """
+
+    id = request.view_args["id"]
+
+    if not id:
+        return jsonify({"msg": "ID is required"}), 400
+
+    message, status_code = user_service.delete_user(id)
 
     return jsonify(message), status_code

@@ -80,3 +80,22 @@ class UserService:
         except Exception as e:
             app.logger.error(f"Failed to send email to {email}: {str(e)}")
             return jsonify({"error": str(e)}), 500
+
+    def delete_user(self, id):
+        """
+        Delete user by ID
+        """
+
+        user = self.check_user_exist("id", id)
+
+        if not user:
+            return {"msg": "User not found"}, 404
+
+        try:
+            db.session.delete(user)
+            db.session.commit()
+
+            return {"msg": "User deleted successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"msg": "Error deleting user", "error": str(e)}, 500
