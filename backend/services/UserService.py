@@ -1,6 +1,6 @@
 from datetime import timedelta
 import cryptography
-from flask import app, jsonify, url_for
+from flask import app, jsonify, render_template, url_for
 from flask_jwt_extended import create_access_token
 from flask_mail import Message
 from utils.utils import decrypt_password, encrypt_password
@@ -100,12 +100,14 @@ class UserService:
             db.session.rollback()
             return {"msg": "Error deleting user", "error": str(e)}, 500
 
-    def generate_confirmation_token(self, email):
+    def send_email_confirmation(self, email):
         token = serializer.dumps(email, salt="email-confirmation-salt")
 
         confirm_url = url_for("user.confirm_email", token=token, _external=True)
 
-        msg = Message("Confirm Your Email", recipients=[email])
+        html_content = render_template("email_template.html", confirm_url=confirm_url)
+
+        msg = Message("Confirm Your Email", recipients=[email], html=html_content)
         msg.body = (
             f"Please confirm your email by clicking the following link: {confirm_url}"
         )
