@@ -61,7 +61,7 @@ def register():
     if status_code != 201:
         return jsonify(message), status_code
 
-    error, status_code = user_service.generate_confirmation_token(email)
+    error, status_code = user_service.send_email_confirmation(email)
     if error:
         return jsonify(error), status_code
 
@@ -114,6 +114,6 @@ def resend_email():
     if not existing_user:
         return jsonify({"msg": "User with that email is not found"}), 404
 
-    error, status_code = user_service.generate_confirmation_token(email)
+    error, status_code = user_service.send_email_confirmation(email)
     if error:
         return jsonify(error), status_code
