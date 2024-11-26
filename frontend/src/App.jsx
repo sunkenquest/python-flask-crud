@@ -1,8 +1,8 @@
+import UploadImage from "../src/components/Upload/UploadImage";
+
 function App() {
   return (
-    <div className="App">
-
-    </div>
+    <UploadImage />
   );
 }
 
