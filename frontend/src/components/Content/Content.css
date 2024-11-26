@@ -1,0 +1,27 @@
+.content-module {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.response-box {
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.response-text {
+    min-height: 50px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-text {
+    color: #888;
+}
