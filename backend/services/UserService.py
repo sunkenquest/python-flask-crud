@@ -105,7 +105,9 @@ class UserService:
 
         confirm_url = url_for("user.confirm_email", token=token, _external=True)
 
-        html_content = render_template("email_template.html", confirm_url=confirm_url)
+        html_content = render_template(
+            "email_confirmation.html", confirm_url=confirm_url
+        )
 
         msg = Message("Confirm Your Email", recipients=[email], html=html_content)
         msg.body = (
@@ -144,3 +146,44 @@ class UserService:
             return {"message": "Email is confirmed"}, 200
         else:
             return {"error": "Email is not confirmed"}, 400
+
+    def forgot_password_generate_token(self, email):
+        user = self.check_user_exist("email", email)
+
+        if not user:
+            return {"error": "User not found"}, 404
+
+        token = serializer.dumps(email, salt="email-forgot-password-salt")
+
+        confirm_url = url_for("user.reset_password", token=token, _external=True)
+
+        html_content = render_template(
+            "email_forgot_password.html", confirm_url=confirm_url
+        )
+
+        msg = Message("Reset your password", recipients=[email], html=html_content)
+        msg.body = (
+            f"Please reset your password by clicking the following link: {confirm_url}"
+        )
+
+        try:
+            mail.send(msg)
+            return "Forgot password email has been sent.", 200
+        except Exception as e:
+            return f"Error: {str(e)}", 500
+
+    def reset_password(self, email, password):
+        user = self.check_user_exist("email", email)
+
+        hashed_password = encrypt_password(password)
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return "User not found.", 404
+
+        try:
+            user.password = hashed_password
+            db.session.commit()
+            return "Password reset successful.", 200
+        except Exception as e:
+            return f"Error: {str(e)}", 500
