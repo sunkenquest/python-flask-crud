@@ -6,6 +6,7 @@ import "./UploadImage.css";
 const UploadImage = () => {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [loading, setLoading] = useState(false);  // State for loading
 
     const { responseMessage, handleSubmit } = useImageUpload("http://127.0.0.1:5000/gemini/upload");
 
@@ -24,8 +25,10 @@ const UploadImage = () => {
         setPreview(null);
     };
 
-    const handleFormSubmit = () => {
-        handleSubmit(image);
+    const handleFormSubmit = async () => {
+        setLoading(true);  // Set loading to true when submit is clicked
+        await handleSubmit(image);
+        setLoading(false); // Set loading to false once the submission is complete
     };
 
     return (
@@ -38,8 +41,16 @@ const UploadImage = () => {
                             <button className="remove-btn" onClick={handleRemoveImage}>
                                 Remove
                             </button>
-                            <button className="submit-btn" onClick={handleFormSubmit}>
-                                Submit
+                            <button
+                                className="submit-btn"
+                                onClick={handleFormSubmit}
+                                disabled={loading} // Disable button when loading
+                            >
+                                {loading ? (
+                                    <span className="loader"></span> // Show loader when loading
+                                ) : (
+                                    "Submit"
+                                )}
                             </button>
                         </div>
                     </div>
