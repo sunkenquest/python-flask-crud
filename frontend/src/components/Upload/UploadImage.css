@@ -1,6 +1,7 @@
 .upload-container {
     display: grid;
     justify-content: center;
+    justify-items: center;
     align-items: center;
     min-height: 100vh;
     background-color: #f8f9fa;
