@@ -1,11 +1,13 @@
 import { useState } from "react";
 import ContentModule from "../Content/Content";
+import useImageUpload from "../../hooks/useImageUpload";
 import "./UploadImage.css";
 
 const UploadImage = () => {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
-    const [responseMessage, setResponseMessage] = useState("");
+
+    const { responseMessage, handleSubmit } = useImageUpload("http://127.0.0.1:5000/gemini/upload");
 
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
@@ -20,34 +22,10 @@ const UploadImage = () => {
     const handleRemoveImage = () => {
         setImage(null);
         setPreview(null);
-        setResponseMessage("");
     };
 
-    const handleSubmit = async () => {
-        if (!image) {
-            alert("Please upload an image before submitting.");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", image);
-        formData.append("mime_type", image.type || "image/jpeg");
-
-        try {
-            const response = await fetch("http://127.0.0.1:5000/gemini/upload", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            setResponseMessage(data.response || "No response message received.");
-        } catch (error) {
-            setResponseMessage(`Error: ${error.message}`);
-        }
+    const handleFormSubmit = () => {
+        handleSubmit(image);
     };
 
     return (
@@ -60,7 +38,7 @@ const UploadImage = () => {
                             <button className="remove-btn" onClick={handleRemoveImage}>
                                 Remove
                             </button>
-                            <button className="submit-btn" onClick={handleSubmit}>
+                            <button className="submit-btn" onClick={handleFormSubmit}>
                                 Submit
                             </button>
                         </div>
