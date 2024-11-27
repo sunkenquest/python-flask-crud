@@ -6,7 +6,6 @@ import "./Content.css";
 const ContentModule = ({ responseMessage }) => {
     return (
         <div className="content-module">
-            <h2>Response</h2>
             <div className="response-box">
                 {responseMessage ? (
                     <ReactMarkdown

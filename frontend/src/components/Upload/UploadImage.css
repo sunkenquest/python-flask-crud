@@ -4,9 +4,9 @@
     justify-items: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #f8f9fa;
     width: 100%;
     height: 100vh;
+    margin-top: 50px;
 }
 
 .upload-box {
